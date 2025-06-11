@@ -13,6 +13,8 @@ Building vocal sample libraries for virtual choirs or solo vocalists.
 Creating SFZ instruments for other sounds like strings, percussion, or experimental audio.
 Streamlining workflows for virtual instrument design.
 
+Video Tutorial: https://youtu.be/FA-fBZdOyyw?si=pRb5DQvSkC1tis9l
+
 Installation
 
 Clone the repository:git clone https://github.com/nirblu/choir_maker.git
