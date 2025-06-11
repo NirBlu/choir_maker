@@ -3,6 +3,8 @@ from gui import ChoirRecorderGUI
 from audio import AudioManager
 from sfz import SFZGenerator
 import os
+import platform
+import subprocess
 
 class ChoirRecorderApp:
     def __init__(self):
@@ -20,11 +22,11 @@ class ChoirRecorderApp:
     def generate_note_sequence(self):
         notes = []
         octave = 2
-        while True:  # Continue generating notes until user finishes
+        while True:
             for note in ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']:
                 notes.append(f"{note}{octave}")
             octave += 1
-            if octave > 10:  # Safety limit to prevent infinite loop
+            if octave > 10:
                 break
         return notes
 
@@ -93,9 +95,22 @@ class ChoirRecorderApp:
 
     def compile_sfz(self, sfz_params=None):
         try:
-            output_sfz = sfz_params.get('filename', 'choir.sfz') if sfz_params else 'choir.sfz'
+            output_sfz = os.path.join(self.output_dir, sfz_params.get('filename', 'choir.sfz') if sfz_params else 'choir.sfz')
             self.sfz_generator.generate_sfz(self.recorded_samples, output_sfz, self.output_dir, sfz_params)
-            self.gui.show_completion(self.compile_sfz)
+            self.open_output_folder()
+            self.root.destroy()
+        except:
+            pass
+
+    def open_output_folder(self):
+        folder_path = os.path.abspath(self.output_dir)
+        try:
+            if platform.system() == "Windows":
+                os.startfile(folder_path)
+            elif platform.system() == "Darwin":
+                subprocess.Popen(["open", folder_path])
+            else:
+                subprocess.Popen(["xdg-open", folder_path])
         except:
             pass
 
