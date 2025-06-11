@@ -5,6 +5,7 @@ from sfz import SFZGenerator
 import os
 import platform
 import subprocess
+import webbrowser
 
 class ChoirRecorderApp:
     def __init__(self):
@@ -100,7 +101,7 @@ class ChoirRecorderApp:
             self.open_output_folder()
             self.root.destroy()
         except:
-            pass
+            self.root.destroy()
 
     def open_output_folder(self):
         folder_path = os.path.abspath(self.output_dir)
@@ -108,11 +109,14 @@ class ChoirRecorderApp:
             if platform.system() == "Windows":
                 os.startfile(folder_path)
             elif platform.system() == "Darwin":
-                subprocess.Popen(["open", folder_path])
+                subprocess.run(["open", folder_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             else:
-                subprocess.Popen(["xdg-open", folder_path])
+                subprocess.run(["xdg-open", folder_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except:
-            pass
+            try:
+                webbrowser.open(f"file://{folder_path}")
+            except:
+                pass
 
     def run(self):
         self.root.mainloop()
