@@ -20,10 +20,12 @@ class ChoirRecorderApp:
     def generate_note_sequence(self):
         notes = []
         octave = 2
-        while True:
+        while True:  # Continue generating notes until user finishes
             for note in ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']:
                 notes.append(f"{note}{octave}")
             octave += 1
+            if octave > 10:  # Safety limit to prevent infinite loop
+                break
         return notes
 
     def start_recording(self, tuning, sample_length, sample_rate, output_device, input_device, start_note, countdown_length):
@@ -40,8 +42,11 @@ class ChoirRecorderApp:
             pass
 
     def process_next_note(self):
-        self.current_note = self.notes[self.current_note_idx]
-        self.play_note_guide()
+        if self.current_note_idx < len(self.notes):
+            self.current_note = self.notes[self.current_note_idx]
+            self.play_note_guide()
+        else:
+            self.gui.show_completion(self.compile_sfz)
 
     def play_note_guide(self):
         try:
