@@ -10,7 +10,7 @@ class SFZGenerator:
     def note_to_midi_number(self, note):
         note_name = note[:-1]
         octave = int(note[-1])
-        return 12 * (octave + 1) + self.note_to_midi[note_name]  # Shift up one octave
+        return 12 * octave + self.note_to_midi[note_name]
 
     def generate_sfz(self, samples, output_file, sample_dir, sfz_params=None):
         sfz_params = sfz_params or {
