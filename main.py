@@ -19,6 +19,8 @@ class ChoirRecorderApp:
         self.notes = self.generate_note_sequence()
         self.recorded_samples = {}
         self.countdown_length = 3
+        self.last_recorded_file = None
+        self.last_recorded_note = None
 
     def generate_note_sequence(self):
         notes = []
@@ -63,8 +65,12 @@ class ChoirRecorderApp:
         try:
             output_file = os.path.join(self.output_dir, f"{self.current_note}_{len(self.recorded_samples.get(self.current_note, [])) + 1}.wav")
             self.audio_manager.record_audio(self.sample_length, output_file)
+            self.last_recorded_file = output_file
+            self.last_recorded_note = self.current_note
             self.gui.show_recording_options(self.current_note)
         except:
+            self.last_recorded_file = None
+            self.last_recorded_note = None
             self.gui.show_recording_options(self.current_note)
 
     def on_recording_complete(self, action, note, sfz_params=None):
@@ -72,24 +78,41 @@ class ChoirRecorderApp:
             if action == "keep":
                 if note not in self.recorded_samples:
                     self.recorded_samples[note] = []
-                self.recorded_samples[note].append(os.path.join(self.output_dir, f"{note}_{len(self.recorded_samples[note]) + 1}.wav"))
+                if self.last_recorded_file and self.last_recorded_note == note:
+                    self.recorded_samples[note].append(self.last_recorded_file)
+                self.last_recorded_file = None
+                self.last_recorded_note = None
                 self.current_note_idx += 1
                 self.process_next_note()
             elif action == "keep_again":
                 if note not in self.recorded_samples:
                     self.recorded_samples[note] = []
-                self.recorded_samples[note].append(os.path.join(self.output_dir, f"{note}_{len(self.recorded_samples[note]) + 1}.wav"))
+                if self.last_recorded_file and self.last_recorded_note == note:
+                    self.recorded_samples[note].append(self.last_recorded_file)
+                self.last_recorded_file = None
+                self.last_recorded_note = None
                 self.play_note_guide()
             elif action == "discard":
                 try:
-                    os.remove(os.path.join(self.output_dir, f"{note}_{len(self.recorded_samples.get(note, [])) + 1}.wav"))
+                    if self.last_recorded_file:
+                        os.remove(self.last_recorded_file)
                 except FileNotFoundError:
                     pass
+                self.last_recorded_file = None
+                self.last_recorded_note = None
                 self.play_note_guide()
             elif action == "skip":
+                self.last_recorded_file = None
+                self.last_recorded_note = None
                 self.current_note_idx += 1
                 self.process_next_note()
             elif action == "finish":
+                if self.last_recorded_file and self.last_recorded_note:
+                    if self.last_recorded_note not in self.recorded_samples:
+                        self.recorded_samples[self.last_recorded_note] = []
+                    self.recorded_samples[self.last_recorded_note].append(self.last_recorded_file)
+                self.last_recorded_file = None
+                self.last_recorded_note = None
                 self.compile_sfz(sfz_params)
         except:
             pass
